@@ -3,6 +3,11 @@ import sqlite3
 import hashlib
 import os
 import dotenv
+import functools
+import wraps
+
+
+
 
 API_TOKEN = os.getenv("APU_TOKEN")
 
@@ -63,6 +68,7 @@ def get_products():
 
 
 @app.route("/products", methods = ["POST"])
+@require_token
 def add_products():
     data = request.get_json()
     name = data.get("name")
