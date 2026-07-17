@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 import sqlite3
+import hashlib
+
 
 app = Flask(__name__)
 
@@ -21,6 +23,13 @@ def init_db():
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     price REAL NOT NULL
+    )
+    """)
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
     )
     """)
     conn.commit()
@@ -61,6 +70,50 @@ def add_products():
     #products.append(new_product)
     return jsonify({"message": "Product added", "product":new_product}), 201
 
+@app.route("/register",methods = ["POST"])
+
+def register():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"error":"Missing username or password"}), 400
+
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest().upper()
+
+    try:
+        conn = get_db_connection()
+        conn.execute("INSERT INTO users (username, password) VALUES (?,?)",(username,hashed_password))
+        conn.commit()
+        conn.close()
+        return jasonify({
+            "message": "User registered successfully"
+        }),201
+
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "Username already exists"}),409
+
+@app.route("/login",methods = ["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({
+            "message": "Missing username or password"
+        }), 400
+
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest().upper()
+    conn = get_db_connection()
+    user = conn.execute(" SELECT * FROM users WHERE username = ? AND password = ?",(username,password)).fetchone()
+    conn.close()
+
+    if user:
+        return jsonify({"message": f"Welcomne {username}!"})
+    else:
+        return jsonify({"error":"Invalid credentials"}), 401
 
 
     
