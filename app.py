@@ -87,7 +87,7 @@ def register():
         conn.execute("INSERT INTO users (username, password) VALUES (?,?)",(username,hashed_password))
         conn.commit()
         conn.close()
-        return jasonify({
+        return jsonify({
             "message": "User registered successfully"
         }),201
 
