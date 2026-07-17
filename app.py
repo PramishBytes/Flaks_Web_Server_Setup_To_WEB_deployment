@@ -1,12 +1,25 @@
 from flask import Flask, jsonify, request
 import sqlite3
 import hashlib
+import os
+import dotenv
 
+API_TOKEN = os.getenv("APU_TOKEN")
 
 app = Flask(__name__)
 
+def require_token(f):
+    @wraps(f)
+    def decorated_function(*args,**kwargs):
+        token = request.headers.get("Authorization")
+        if token != f"Bearer{API_TOKEN}":
+            return jsonify({"message":"Unauthorized"}),401
+        return f(*args,**kwargs)
+
+    return decorated_function
+
 def get_db_connection():
-    import os
+    
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "products.db")
     
