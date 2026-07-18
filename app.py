@@ -9,7 +9,7 @@ import wraps
 
 
 
-API_TOKEN = os.getenv("APU_TOKEN")
+API_TOKEN = os.getenv("API_TOKEN")
 
 app = Flask(__name__)
 
