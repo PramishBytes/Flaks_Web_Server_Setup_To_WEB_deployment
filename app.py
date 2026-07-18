@@ -3,9 +3,7 @@ import sqlite3
 import hashlib
 import os
 from functools import wraps
-import dotenv 
-import load_dotenv
-
+from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
