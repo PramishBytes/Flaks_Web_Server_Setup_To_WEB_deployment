@@ -3,12 +3,11 @@ import sqlite3
 import hashlib
 import os
 import dotenv
-import functools
-import wraps
+from functools import wraps
 
 
 
-
+dotenv.load_dotenv()  
 API_TOKEN = os.getenv("API_TOKEN")
 
 app = Flask(__name__)
@@ -17,7 +16,7 @@ def require_token(f):
     @wraps(f)
     def decorated_function(*args,**kwargs):
         token = request.headers.get("Authorization")
-        if token != f"Bearer{API_TOKEN}":
+        if token != f"Bearer {API_TOKEN}":
             return jsonify({"message":"Unauthorized"}),401
         return f(*args,**kwargs)
 
@@ -127,7 +126,7 @@ def login():
 
     hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest().upper()
     conn = get_db_connection()
-    user = conn.execute(" SELECT * FROM users WHERE username = ? AND password = ?",(username,password)).fetchone()
+    user = conn.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hashed_password)).fetchone()
     conn.close()
 
     if user:
